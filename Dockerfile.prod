@@ -7,6 +7,7 @@ ARG GID=1000
 
 # Install dependencies for building Python packages (git is needed for GEOPHIRES-X install)
 RUN apt-get update \
+ && apt-get upgrade -y \
  && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -31,7 +32,8 @@ USER python
 COPY --chown=python:python requirements.txt ./
 
 # Install Python packages (including GEOPHIRES-X via git clone)
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools>=78.1.1 \
+ && pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY --chown=python:python app.py ./
@@ -49,6 +51,12 @@ FROM python:${BASE_IMAGE_TAG:-3.12.2-slim-bookworm}
 
 ARG UID=1000
 ARG GID=1000
+
+# Update system packages to patch vulnerabilities
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && rm -rf /var/lib/apt/lists/* \
+ && apt-get clean
 
 # Create non-root user
 RUN groupadd -g "${GID}" python \
