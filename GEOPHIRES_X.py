@@ -91,7 +91,7 @@ def Geophires_output(gradient,depth,type_geo,no_prod,no_inj):
         # print('124 val', val)
         val2 = val.strip()
 
-        val3 = re.sub("[^0-9\.]", "", val2)
+        val3 = re.sub(r"[^0-9\.]", "", val2)
         #print('type(val2) val3', val2, type(val2), val3)
         if len(val3)>0:
             val2 = float(val3)
