@@ -16,3 +16,53 @@ services:
       - PYTHONUNBUFFERED=1
       - BASE_IMAGE_TAG=3.12.2-slim-bookworm
       - DOCKER_ENV_VARS='on'
+
+  nginx:
+    image: 991404956194.dkr.ecr.us-west-2.amazonaws.com/nrel-split-nginx-test:1.29.4
+    container_name: "${PROJECT_NAME}_nginx"
+    depends_on:
+      - app
+    environment:
+      NGINX_BACKEND_HOST: app
+      NGINX_BACKEND_PORT: 8501
+      NGINX_CLIENT_MAX_BODY_SIZE: '1024M'
+      NGINX_ERROR_LOG_LEVEL: debug
+      NGINX_GROUP: 'www-data'
+      NGINX_HIDE_50x_ERRORS: 'off'
+      NGINX_KEEPALIVE_TIMEOUT: '360s'
+      NGINX_NO_DEFAULT_HEADERS: '1'
+      NGINX_SEND_TIMEOUT: '300s'
+      NGINX_SERVER_TOKENS: 'Off'
+      NGINX_USER: 'www-data'
+      NGINX_VHOST_PRESET: streamlit
+
+    links:
+      - app
+    labels:
+      - "traefik.http.routers.${PROJECT_NAME}_nginx.entrypoints=web"
+      - "traefik.http.middlewares.${PROJECT_NAME}_https_nginx.redirectscheme.scheme=https"
+      - "traefik.http.routers.${PROJECT_NAME}_https_nginx.rule=Host(`${PROJECT_NAME}.docker.localhost`)"
+      - "traefik.http.routers.${PROJECT_NAME}_https_nginx.entrypoints=web-secure"
+      - "traefik.http.routers.${PROJECT_NAME}_https_nginx.tls=true"
+
+  traefik:
+    image: traefik:v2.2.1
+    container_name: "${PROJECT_NAME}_traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+      - --providers.file.directory=/etc/traefik/dynamic_conf
+      - '--providers.file.filename=/etc/traefik/dynamic_conf/conf.yml'
+      - --providers.file.watch=true
+      - "--log.level=DEBUG"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web-secure.address=:443"
+    ports:
+      - '80:80'
+      - '8080:8080'
+      - '443:443'
+      - "50000:50000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.dynamic.yml:/etc/traefik/dynamic_conf/conf.yml:ro
+      - ./certs/:/certs/
