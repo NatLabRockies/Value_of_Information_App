@@ -78,7 +78,7 @@ newValuedf1.style.set_properties(**{'font-size': '35pt'}) # this doesn't seem to
 # Code to input these values
 original_title = '<p style="font-family:Courier; color:Black; font-size: 25px;"> Enter revenue for your \'drill\' decision with *positive* geothermal combination [$] </p>'
 st.markdown(original_title, unsafe_allow_html=True)
-edited_df = st.data_editor(newValuedf1,hide_index=True,use_container_width=True)
+edited_df = st.data_editor(newValuedf1,hide_index=True,width='stretch')
 # try this https://discuss.streamlit.io/t/center-dataframe-header/51193/4
 # newValuedf1.style.set_properties(**{'text-align': 'center'}).set_table_styles([{'selector': 'th', 'props': [('text-align', 'center')]}])
 # st.markdown('<style>.col_heading{text-align: center;}</style>', unsafe_allow_html=True)
@@ -143,7 +143,7 @@ plt.xlabel('Well Depth (m)', color='brown',fontsize=14)
 
 # Plotting text on the VOI plot
 txtonplot = r'$v_{a=Drill}(\Theta=Positive) =$'
-ax1.text(np.min(vprior_depth), value_array[-1,-1]*0.7, txtonplot+'\${:0,.0f}'.format(value_array[-1,-1]), 
+ax1.text(np.min(vprior_depth), value_array[-1,-1]*0.7, txtonplot+r'\${:0,.0f}'.format(value_array[-1,-1]), 
         size=12, color='green',
          #va="baseline", ha="left", multialignment="left",
           horizontalalignment='left',
@@ -193,7 +193,7 @@ st.pyplot(firstfig2)
 
 if showVperfect:  
     
-    st.write('When you "know" when either subsurface condition occurs, you can pick the best ($\max\limits_a$) drilling altervative first ($v_a$).')
+    st.write(r'When you "know" when either subsurface condition occurs, you can pick the best ($\max\limits_a$) drilling altervative first ($v_a$).')
     st.write(r'''$V_{perfect} =  \Sigma_{i=1}^2 Pr(\Theta = \theta_i) \max\limits_a v_a(\theta_i) \ \  \forall a $''')
     st.write(r'''$VOI_{perfect} (Value \ of \ Information) = V_{perfect}-V_{prior}=$'''+str(VPIlist[0])+' - '+str(vprior_INPUT_demo_list[0]))
 
@@ -343,7 +343,7 @@ if uploaded_files is not None:
                 "Values": [30,3]}   
         )
 
-        input_df = st.data_editor(inputs,hide_index=True,use_container_width=True)
+        input_df = st.data_editor(inputs,hide_index=True,width='stretch')
         gradient = input_df['Values'].values[0]
         depth = input_df['Values'].values[1]
 
@@ -377,7 +377,7 @@ if uploaded_files is not None:
         
         st.markdown(original_title, unsafe_allow_html=True)
         st.write("Default values are based on GEOPHIRES results for gradient and depth (user input)")
-        edited_df = st.data_editor(newValuedf,hide_index=True,use_container_width=True)
+        edited_df = st.data_editor(newValuedf,hide_index=True,width='stretch')
 
         pos_drill_outcome = float(np.ravel(edited_df[['Geothermal Resource Exists (positive)']])[1]) 
         neg_drill_outcome = float(np.ravel(edited_df[['No Geothermal Resource Exists (negative)']])[1])
@@ -405,7 +405,7 @@ if uploaded_files is not None:
                        
         
         st.subheader(r'''$V_{imperfect}$='''+'${:0,.0f}'.format(VII_input).replace('$-','-$'))
-        st.subheader('Vprior  \${:0,.0f},\t   VOIperfect = \${:0,.0f}'.format(vprior_unif_out,VPI-vprior_unif_out).replace('$-','-$'))
+        st.subheader(r'Vprior  \${:0,.0f},\t   VOIperfect = \${:0,.0f}'.format(vprior_unif_out,VPI-vprior_unif_out).replace('$-','-$'))
         st.subheader(r'''$V_{perfect}$='''+'${:0,.0f}'.format(VPI).replace('$-','-$'))
         # st.write('with uniform marginal', locale.currency(VII_unifMarginal, grouping=True ))
         # st.write('with uniform Prior', '${:0,.0f}'.format(VII_unifPrior).replace('$-','-$'))
