@@ -46,7 +46,7 @@ services:
       - "traefik.http.routers.${PROJECT_NAME}_https_nginx.tls=true"
 
   traefik:
-    image: traefik:v2.2.1
+    image: traefik:v2.11.31
     container_name: "${PROJECT_NAME}_traefik"
     command:
       - "--api.insecure=true"
