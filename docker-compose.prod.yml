@@ -34,7 +34,9 @@ services:
       NGINX_SEND_TIMEOUT: '300s'
       NGINX_SERVER_TOKENS: 'Off'
       NGINX_USER: 'www-data'
-      NGINX_VHOST_PRESET: streamlit
+      NGINX_VHOST_PRESET: http-proxy
+      NGINX_NO_STATIC: 'on'
+      NGINX_WEBSOCKET_UPGRADE: 'on'
 
     links:
       - app
