@@ -1,0 +1,11 @@
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+serverAddress = "voinrel-dev.stratus.nrel.gov"
+serverPort = 443
+
+[client]
+toolbarMode = "minimal"

@@ -43,6 +43,7 @@ COPY --chown=python:python GEOPHIRES_X.py ./
 COPY --chown=python:python User_input.py ./
 COPY --chown=python:python VOI.py ./
 COPY --chown=python:python dtree.png ./
+COPY --chown=python:python .streamlit ./.streamlit
 
 ARG BASE_IMAGE_TAG
 
