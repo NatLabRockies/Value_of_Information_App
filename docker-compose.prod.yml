@@ -37,7 +37,7 @@ services:
       NGINX_VHOST_PRESET: http-proxy
       NGINX_NO_STATIC: 'on'
       NGINX_WEBSOCKET_UPGRADE: 'on'
-
+      NGINX_HEADERS_CONTENT_SECURITY_POLICY: frame-ancestors 'self';
     links:
       - app
     labels:
