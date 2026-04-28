@@ -3,7 +3,7 @@
 version: '3.8'
 
 services:
-  app:
+  main:
     build:
       dockerfile: Dockerfile.prod
     ports:
@@ -31,21 +31,31 @@ services:
     links:
       - main
     environment:
-      NGINX_CLIENT_MAX_BODY_SIZE: '1024M'
-      NGINX_ERROR_LOG_LEVEL: debug
-      NGINX_GROUP: 'www-data'
-      NGINX_HIDE_50x_ERRORS: 'off'
-      NGINX_KEEPALIVE_TIMEOUT: '360s'
-      NGINX_NO_DEFAULT_HEADERS: '1'
-      NGINX_SEND_TIMEOUT: '300s'
-      NGINX_SERVER_TOKENS: 'Off'
-      NGINX_USER: 'www-data'
       NGINX_BACKEND_HOST: main
       NGINX_BACKEND_PORT: "8501"
+      NGINX_NO_STATIC: "on"
+      NGINX_WEBSOCKET_UPGRADE: "on"
+      NGINX_WEBSOCKET_READ_TIMEOUT: "3m"
+      NGINX_WEBSOCKET_SEND_TIMEOUT: "3m"
+      NGINX_HEADERS_CONTENT_SECURITY_POLICY: "frame-ancestors 'self' *.nrel.gov *.nlr.gov;"
+      NGINX_ACCESS_CONTROL_ALLOW_ORIGIN: "*"
       NGINX_VHOST_PRESET: http-proxy
-      NGINX_NO_STATIC: 'on'
-      NGINX_WEBSOCKET_UPGRADE: 'on'
-      NGINX_HEADERS_CONTENT_SECURITY_POLICY: frame-ancestors 'self';
+      NGINX_CLIENT_MAX_BODY_SIZE: "1024m"
+      NGINX_ERROR_LOG_LEVEL: debug
+      NGINX_FASTCGI_BUFFERING: "off"
+      NGINX_GROUP: "www-data"
+      NGINX_USER: "www-data"
+      NGINX_MOREHEADERS_ENABLED: "on"
+      NGINX_SERVER_TOKENS: "off"
+      NGINX_HIDE_50x_ERRORS: "on"
+      NGINX_HIDE_50x_ERROR_CODES: "500 501 502 503 504 505 506 507 508 510 511 =404"
+      NGINX_STATIC_OPEN_FILE_CACHE: "off"
+      NGINX_STRICT_TRANSPORT_SECURITY: "max-age=63072000; includeSubDomains; preload"
+      NGINX_EXPECT_CT: "enforce, max-age=7776000, report-uri='https://ABSOLUTE_REPORT_URL'"
+      NGINX_REFERRER_POLICY: "origin"
+      NGINX_X_FRAME_OPTIONS: SAMEORIGIN
+      NGINX_LOG_FORMAT_OVERRIDE: '$$remote_addr - $$remote_user [$$time_local] "$$request" $$status $$body_bytes_sent "$$http_referer""$$http_user_agent""$$http_x_forwarded_for"'
+      DOCKER_ENV_VARS: "on"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost/_stcore/health || exit 1"]
       interval: 30s
