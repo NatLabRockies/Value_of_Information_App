@@ -1,0 +1,142 @@
+---
+# docker-compose.prod-2task.yml
+# Emulates ECS prod with 2 tasks behind traefik (ALB).
+# Shared volume at /shared/media served by nginx via NGINX_MEDIA_ROOT.
+
+version: '3.8'
+
+volumes:
+  shared-media:
+    driver: local
+
+x-main-env: &main-env
+  - PYTHONUNBUFFERED=1
+  - DOCKER_ENV_VARS=on
+  - NGINX_WEBSOCKET_UPGRADE=on
+  - SHARED_MEDIA_DIR=/shared/media
+  - SHARED_MEDIA_URL=/media
+
+x-nginx-env: &nginx-env
+  NGINX_BACKEND_HOST: ${NGINX_BACKEND_HOST}
+  NGINX_BACKEND_PORT: "8501"
+  NGINX_MEDIA_ROOT: /shared/media/
+  NGINX_MEDIA_URL: /media/
+  NGINX_NO_STATIC_URL: "on"
+  NGINX_WEBSOCKET_UPGRADE: "on"
+  NGINX_WEBSOCKET_READ_TIMEOUT: "3m"
+  NGINX_WEBSOCKET_SEND_TIMEOUT: "3m"
+  NGINX_HEADERS_CONTENT_SECURITY_POLICY: "frame-ancestors 'self' *.nrel.gov *.nlr.gov;"
+  NGINX_ACCESS_CONTROL_ALLOW_ORIGIN: "*"
+  NGINX_VHOST_PRESET: http-proxy
+  NGINX_CLIENT_MAX_BODY_SIZE: "1024m"
+  NGINX_ERROR_LOG_LEVEL: debug
+  NGINX_FASTCGI_BUFFERING: "off"
+  NGINX_GROUP: "www-data"
+  NGINX_USER: "www-data"
+  NGINX_MOREHEADERS_ENABLED: "on"
+  NGINX_SERVER_TOKENS: "off"
+  NGINX_STATIC_OPEN_FILE_CACHE: "off"
+  NGINX_REFERRER_POLICY: "origin"
+  NGINX_X_FRAME_OPTIONS: SAMEORIGIN
+  DOCKER_ENV_VARS: "on"
+
+x-nginx-labels: &nginx-labels
+  - "traefik.enable=true"
+  - "traefik.http.routers.voinrel.rule=Host(`voinrel-web.docker.localhost`)"
+  - "traefik.http.routers.voinrel.entrypoints=web-secure"
+  - "traefik.http.routers.voinrel.tls=true"
+  - "traefik.http.services.voinrel.loadbalancer.server.port=80"
+  - "traefik.http.services.voinrel.loadbalancer.sticky.cookie=true"
+  - "traefik.http.services.voinrel.loadbalancer.sticky.cookie.name=AWSALB"
+  - "traefik.http.services.voinrel.loadbalancer.sticky.cookie.httponly=true"
+
+services:
+  main1:
+    build:
+      dockerfile: Dockerfile.prod
+    env_file:
+      - .env
+    environment: *main-env
+    volumes:
+      - shared-media:/shared/media
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import requests; response = requests.get('http://localhost:8501/_stcore/health'); exit(0) if response.status_code == 200 else exit(1)\" "]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  nginx1:
+    image: 991404956194.dkr.ecr.us-west-2.amazonaws.com/nrel-split-nginx:1.29.5.1
+    depends_on:
+      - main1
+    links:
+      - main1
+    environment:
+      <<: *nginx-env
+      NGINX_BACKEND_HOST: main1
+    volumes:
+      - shared-media:/shared/media:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/_stcore/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels: *nginx-labels
+
+  main2:
+    build:
+      dockerfile: Dockerfile.prod
+    env_file:
+      - .env
+    environment: *main-env
+    volumes:
+      - shared-media:/shared/media
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import requests; response = requests.get('http://localhost:8501/_stcore/health'); exit(0) if response.status_code == 200 else exit(1)\" "]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  nginx2:
+    image: 991404956194.dkr.ecr.us-west-2.amazonaws.com/nrel-split-nginx:1.29.5.1
+    depends_on:
+      - main2
+    links:
+      - main2
+    environment:
+      <<: *nginx-env
+      NGINX_BACKEND_HOST: main2
+    volumes:
+      - shared-media:/shared/media:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/_stcore/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels: *nginx-labels
+
+  traefik:
+    image: traefik:v2.11.31
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+      - "--providers.file.directory=/etc/traefik/dynamic_conf"
+      - "--providers.file.filename=/etc/traefik/dynamic_conf/conf.yml"
+      - "--providers.file.watch=true"
+      - "--log.level=DEBUG"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=web-secure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web-secure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.dynamic.yml:/etc/traefik/dynamic_conf/conf.yml:ro
+      - ./certs/:/certs/

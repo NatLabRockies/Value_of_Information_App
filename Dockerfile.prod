@@ -37,6 +37,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
 
 # Copy application code
 COPY --chown=python:python app.py ./
+COPY --chown=python:python shared_media.py ./
 COPY --chown=python:python Bayesian_Modeling.py ./
 COPY --chown=python:python Naive_Bayes.py ./
 COPY --chown=python:python GEOPHIRES_X.py ./
@@ -61,6 +62,9 @@ RUN apt-get update \
 # Create non-root user
 RUN groupadd -g "${GID}" python \
  && useradd --create-home --no-log-init -u "${UID}" -g "${GID}" python
+
+# Create shared media directory for multi-replica support
+RUN mkdir -p /shared/media && chown python:python /shared/media
 
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \

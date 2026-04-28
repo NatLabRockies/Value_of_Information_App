@@ -2,6 +2,10 @@
 
 version: '3.8'
 
+volumes:
+  shared-media:
+    driver: local
+
 services:
   main:
     build:
@@ -12,10 +16,12 @@ services:
       - .env
     volumes:
       - ./.aws/credentials:/root/.aws/credentials:ro
+      - shared-media:/shared/media
     environment:
       - PYTHONUNBUFFERED=1
-      - BASE_IMAGE_TAG=3.12.2-slim-bookworm
       - DOCKER_ENV_VARS=on
+      - SHARED_MEDIA_DIR=/shared/media
+      - SHARED_MEDIA_URL=/media
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import requests; response = requests.get('http://localhost:8501/_stcore/health'); exit(0) if response.status_code == 200 else exit(1)\" "]
       interval: 30s
@@ -30,10 +36,14 @@ services:
       - main
     links:
       - main
+    volumes:
+      - shared-media:/shared/media:ro
     environment:
       NGINX_BACKEND_HOST: main
       NGINX_BACKEND_PORT: "8501"
-      NGINX_NO_STATIC: "on"
+      NGINX_MEDIA_ROOT: "/shared/media/"
+      NGINX_MEDIA_URL: "/media/"
+      NGINX_NO_STATIC_URL: "on"
       NGINX_WEBSOCKET_UPGRADE: "on"
       NGINX_WEBSOCKET_READ_TIMEOUT: "3m"
       NGINX_WEBSOCKET_SEND_TIMEOUT: "3m"
@@ -80,6 +90,8 @@ services:
       - --providers.file.watch=true
       - "--log.level=DEBUG"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=web-secure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.web-secure.address=:443"
     ports:
       - '80:80'

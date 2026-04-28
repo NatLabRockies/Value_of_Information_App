@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as sns
 import streamlit as st
 import matplotlib.pyplot as plt
+from shared_media import shared_pyplot
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KernelDensity
@@ -112,7 +113,7 @@ def likelihood_KDE(X_train,X_test, y_train, y_test,x_cur, best_parameters):
     # # n_out = plt.hist([X_test[y_test>0],X_test[y_test==0]], color=['r','g'],histtype='barstacked',rwidth=(X_test.max() - X_test.min()) / kde_pos.bandwidth)
     # #.iloc[:,feat4]
     # n_out = axes[1].hist([X_test[y_test>0],X_test[y_test==0]], color=['g','r'],histtype='barstacked',rwidth=(X_test.max() - X_test.min()) / kde_pos.bandwidth)
-    st.pyplot(fig2)
+    shared_pyplot(fig2)
     #st.write('WIDTH of BARS: rwidth=(X_test.max() - X_test.min())',rwidth=(X_test.max() - X_test.min()))    
       
     ### COUNT ARRAY FIGURE # # # # #  #
@@ -197,7 +198,7 @@ def Scaledlikelihood_KDE(Pr_prior_POS, Likelihood_neg, Likelihood_pos, X_train,X
     # ax1.set_ylim(0,ax2_ylims[1])
     
     ax1.legend(fontsize=18)
-    st.pyplot(fig20)
+    shared_pyplot(fig20)
 
 def Posterior_via_NaiveBayes(Pr_input_POS, X_train, X_test, y_train, y_test, x_sample, x_cur):
     """
@@ -279,7 +280,7 @@ def Posterior_Marginal_plot(post_input, post_uniform,marg,x_cur, x_sample):
     ax2.set_ylabel('Marginal Probability', color='orange',fontsize=20)
       
     # plt.legend(loc=1,fontsize=18) 
-    st.pyplot(fig4)
+    shared_pyplot(fig4)
 
     title = st.text_input('Filename', 'StreamlitImageDefault_{}.png'.format(x_cur))
     st.write('The current filename is', title)
