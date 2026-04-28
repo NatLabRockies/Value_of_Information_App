@@ -19,6 +19,7 @@ services:
       - shared-media:/shared/media
     environment:
       - PYTHONUNBUFFERED=1
+      - BASE_IMAGE_TAG=3.12.2-slim-bookworm
       - DOCKER_ENV_VARS=on
       - SHARED_MEDIA_DIR=/shared/media
       - SHARED_MEDIA_URL=/media
