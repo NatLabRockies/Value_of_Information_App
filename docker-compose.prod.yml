@@ -15,16 +15,22 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - BASE_IMAGE_TAG=3.12.2-slim-bookworm
-      - DOCKER_ENV_VARS='on'
+      - DOCKER_ENV_VARS=on
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import requests; response = requests.get('http://localhost:8501/_stcore/health'); exit(0) if response.status_code == 200 else exit(1)\" "]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   nginx:
-    image: 991404956194.dkr.ecr.us-west-2.amazonaws.com/nrel-split-nginx-test:1.29.4
+    image: 991404956194.dkr.ecr.us-west-2.amazonaws.com/nrel-split-nginx:1.29.5.1
     container_name: "${PROJECT_NAME}_nginx"
     depends_on:
-      - app
+      - main
+    links:
+      - main
     environment:
-      NGINX_BACKEND_HOST: app
-      NGINX_BACKEND_PORT: 8501
       NGINX_CLIENT_MAX_BODY_SIZE: '1024M'
       NGINX_ERROR_LOG_LEVEL: debug
       NGINX_GROUP: 'www-data'
@@ -34,12 +40,18 @@ services:
       NGINX_SEND_TIMEOUT: '300s'
       NGINX_SERVER_TOKENS: 'Off'
       NGINX_USER: 'www-data'
+      NGINX_BACKEND_HOST: main
+      NGINX_BACKEND_PORT: "8501"
       NGINX_VHOST_PRESET: http-proxy
       NGINX_NO_STATIC: 'on'
       NGINX_WEBSOCKET_UPGRADE: 'on'
       NGINX_HEADERS_CONTENT_SECURITY_POLICY: frame-ancestors 'self';
-    links:
-      - app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/_stcore/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     labels:
       - "traefik.http.routers.${PROJECT_NAME}_nginx.entrypoints=web"
       - "traefik.http.middlewares.${PROJECT_NAME}_https_nginx.redirectscheme.scheme=https"
