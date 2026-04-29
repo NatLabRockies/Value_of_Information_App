@@ -6,8 +6,6 @@ nginx's /media/ static location instead of Streamlit's in-memory media cache.
 import os
 import hashlib
 from io import BytesIO
-import streamlit as st
-import streamlit.components.v1 as components
 
 MEDIA_DIR = os.environ.get("SHARED_MEDIA_DIR", "/shared/media")
 MEDIA_URL = os.environ.get("SHARED_MEDIA_URL", "/media")
@@ -15,6 +13,8 @@ MEDIA_URL = os.environ.get("SHARED_MEDIA_URL", "/media")
 
 def shared_pyplot(fig, **kwargs):
     """Drop-in replacement for st.pyplot(fig) that writes to shared storage."""
+    import streamlit.components.v1 as components
+
     os.makedirs(MEDIA_DIR, exist_ok=True)
     buf = BytesIO()
     fig.savefig(buf, format="png", bbox_inches="tight", dpi=150)
