@@ -2,20 +2,36 @@
 
 Saves matplotlib figures to a shared filesystem and displays them via
 nginx's /media/ static location instead of Streamlit's in-memory media cache.
+
+Falls back to st.pyplot() when shared storage is not available (CI, local dev).
 """
 import os
 import hashlib
 from io import BytesIO
-import streamlit as st
-import streamlit.components.v1 as components
 
 MEDIA_DIR = os.environ.get("SHARED_MEDIA_DIR", "/shared/media")
 MEDIA_URL = os.environ.get("SHARED_MEDIA_URL", "/media")
 
 
+def _shared_storage_available():
+    """Check if shared media directory exists or can be created."""
+    try:
+        os.makedirs(MEDIA_DIR, exist_ok=True)
+        return True
+    except OSError:
+        return False
+
+
 def shared_pyplot(fig, **kwargs):
     """Drop-in replacement for st.pyplot(fig) that writes to shared storage."""
-    os.makedirs(MEDIA_DIR, exist_ok=True)
+    import streamlit as st
+
+    if not _shared_storage_available():
+        st.pyplot(fig, **kwargs)
+        return
+
+    import streamlit.components.v1 as components
+
     buf = BytesIO()
     fig.savefig(buf, format="png", bbox_inches="tight", dpi=150)
     img_bytes = buf.getvalue()
