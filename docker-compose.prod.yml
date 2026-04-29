@@ -2,8 +2,12 @@
 
 version: '3.8'
 
+volumes:
+  shared-media:
+    driver: local
+
 services:
-  app:
+  main:
     build:
       dockerfile: Dockerfile.prod
     ports:
@@ -12,34 +16,63 @@ services:
       - .env
     volumes:
       - ./.aws/credentials:/root/.aws/credentials:ro
+      - shared-media:/shared/media
     environment:
       - PYTHONUNBUFFERED=1
       - BASE_IMAGE_TAG=3.12.2-slim-bookworm
-      - DOCKER_ENV_VARS='on'
+      - DOCKER_ENV_VARS=on
+      - SHARED_MEDIA_DIR=/shared/media
+      - SHARED_MEDIA_URL=/media
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import requests; response = requests.get('http://localhost:8501/_stcore/health'); exit(0) if response.status_code == 200 else exit(1)\" "]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   nginx:
-    image: 991404956194.dkr.ecr.us-west-2.amazonaws.com/nrel-split-nginx-test:1.29.4
+    image: 991404956194.dkr.ecr.us-west-2.amazonaws.com/nrel-split-nginx:1.29.5.1
     container_name: "${PROJECT_NAME}_nginx"
     depends_on:
-      - app
-    environment:
-      NGINX_BACKEND_HOST: app
-      NGINX_BACKEND_PORT: 8501
-      NGINX_CLIENT_MAX_BODY_SIZE: '1024M'
-      NGINX_ERROR_LOG_LEVEL: debug
-      NGINX_GROUP: 'www-data'
-      NGINX_HIDE_50x_ERRORS: 'off'
-      NGINX_KEEPALIVE_TIMEOUT: '360s'
-      NGINX_NO_DEFAULT_HEADERS: '1'
-      NGINX_SEND_TIMEOUT: '300s'
-      NGINX_SERVER_TOKENS: 'Off'
-      NGINX_USER: 'www-data'
-      NGINX_VHOST_PRESET: http-proxy
-      NGINX_NO_STATIC: 'on'
-      NGINX_WEBSOCKET_UPGRADE: 'on'
-      NGINX_HEADERS_CONTENT_SECURITY_POLICY: frame-ancestors 'self';
+      - main
     links:
-      - app
+      - main
+    volumes:
+      - shared-media:/shared/media:ro
+    environment:
+      NGINX_BACKEND_HOST: main
+      NGINX_BACKEND_PORT: "8501"
+      NGINX_MEDIA_ROOT: "/shared/media/"
+      NGINX_MEDIA_URL: "/media/"
+      NGINX_NO_STATIC_URL: "on"
+      NGINX_WEBSOCKET_UPGRADE: "on"
+      NGINX_WEBSOCKET_READ_TIMEOUT: "3m"
+      NGINX_WEBSOCKET_SEND_TIMEOUT: "3m"
+      NGINX_HEADERS_CONTENT_SECURITY_POLICY: "frame-ancestors 'self' *.nrel.gov *.nlr.gov;"
+      NGINX_ACCESS_CONTROL_ALLOW_ORIGIN: "*"
+      NGINX_VHOST_PRESET: http-proxy
+      NGINX_CLIENT_MAX_BODY_SIZE: "1024m"
+      NGINX_ERROR_LOG_LEVEL: debug
+      NGINX_FASTCGI_BUFFERING: "off"
+      NGINX_GROUP: "www-data"
+      NGINX_USER: "www-data"
+      NGINX_MOREHEADERS_ENABLED: "on"
+      NGINX_SERVER_TOKENS: "off"
+      NGINX_HIDE_50x_ERRORS: "on"
+      NGINX_HIDE_50x_ERROR_CODES: "500 501 502 503 504 505 506 507 508 510 511 =404"
+      NGINX_STATIC_OPEN_FILE_CACHE: "off"
+      NGINX_STRICT_TRANSPORT_SECURITY: "max-age=63072000; includeSubDomains; preload"
+      NGINX_EXPECT_CT: "enforce, max-age=7776000, report-uri='https://ABSOLUTE_REPORT_URL'"
+      NGINX_REFERRER_POLICY: "origin"
+      NGINX_X_FRAME_OPTIONS: SAMEORIGIN
+      NGINX_LOG_FORMAT_OVERRIDE: '$$remote_addr - $$remote_user [$$time_local] "$$request" $$status $$body_bytes_sent "$$http_referer""$$http_user_agent""$$http_x_forwarded_for"'
+      DOCKER_ENV_VARS: "on"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/_stcore/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     labels:
       - "traefik.http.routers.${PROJECT_NAME}_nginx.entrypoints=web"
       - "traefik.http.middlewares.${PROJECT_NAME}_https_nginx.redirectscheme.scheme=https"
@@ -58,6 +91,8 @@ services:
       - --providers.file.watch=true
       - "--log.level=DEBUG"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=web-secure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.web-secure.address=:443"
     ports:
       - '80:80'

@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from shared_media import shared_pyplot
 from matplotlib import colors 
 from matplotlib import ticker
 import os
@@ -189,7 +190,7 @@ axins1.xaxis.set_major_formatter(formatter)
 axins1.xaxis.set_major_formatter('{x:0,.0f}')
 
 #Show the VOI plot
-st.pyplot(firstfig2)
+shared_pyplot(firstfig2)
 
 if showVperfect:  
     
