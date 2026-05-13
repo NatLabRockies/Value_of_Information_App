@@ -83,10 +83,10 @@ def likelihood_KDE(X_train,X_test, y_train, y_test,x_cur, best_parameters):
     fig2, ax2 = plt.subplots(figsize=(15,8),ncols=1,nrows=1) # CHANGED to one subplot
     # ax2.hist(X_test,alpha=0.5,color='grey',label='X_test',rwidth=(X_test.max() - X_test.min()) / kde_pos.bandwidth,hatch='/')
     #n_out = ax2.hist([X_test[y_test>0],X_test[y_test==0]], alpha=0.5,facecolor=['g','r'],
-    n_out = ax2.hist(X_pos_all, alpha=0.3,facecolor='g',#[X_train[y_train>0]]
-                     histtype='bar', hatch='O',edgecolor='grey',label='$~Pr(X|\Theta=Positive_{geothermal}$)',bins=x_d) #tacked,bins rwidth= kde_pos.bandwidth) #rwidth= kde_pos.bandwidth,
-    n_out = ax2.hist(X_neg_all, alpha=0.3,facecolor='r',#X_train[y_train==0]
-                     histtype='barstacked',hatch='/',edgecolor='grey',label='$~Pr(X|\Theta=Negative_{geothermal}$)',bins=x_d) #rwidth= kde_pos.bandwidth (X_test.max() - X_test.min()) / 
+    n_out = ax2.hist(X_pos_all, alpha=0.3,facecolor='orangered',#[X_train[y_train>0]]
+                     histtype='bar', hatch='O',edgecolor='grey',label='$~Pr(X|\Theta=Existence_{geothermal}$)',bins=x_d) #tacked,bins rwidth= kde_pos.bandwidth) #rwidth= kde_pos.bandwidth,
+    n_out = ax2.hist(X_neg_all, alpha=0.3,facecolor='cornflowerblue',#X_train[y_train==0]
+                     histtype='barstacked',hatch='/',edgecolor='grey',label='$~Pr(X|\Theta=Absence_{geothermal}$)',bins=x_d) #rwidth= kde_pos.bandwidth (X_test.max() - X_test.min()) / 
                      
     ax2.legend(fontsize=18)
     ax2.set_ylabel('Empirical data counts', fontsize=18)
@@ -94,10 +94,10 @@ def likelihood_KDE(X_train,X_test, y_train, y_test,x_cur, best_parameters):
     ax2_ylims = ax2.axes.get_ylim()  
 
     ax1 = plt.twinx(ax=ax2)
-    ax1.fill_between(x_d, pos_like_scaled, alpha=0.3,color='green')
-    ax1.plot(x_d,pos_like_scaled,'g.')
-    ax1.fill_between(x_d, neg_like_scaled, alpha=0.3,color='red')
-    ax1.plot(x_d,neg_like_scaled,'r.')
+    ax1.fill_between(x_d, pos_like_scaled, alpha=0.3,color='orangered') #green
+    ax1.plot(x_d,pos_like_scaled,'orangered','.') #g
+    ax1.fill_between(x_d, neg_like_scaled, alpha=0.3,color='cornflowerblue') #red
+    ax1.plot(x_d,neg_like_scaled,'cornflowerblue','.') #r
     ax1.legend(loc=0, fontsize=17)
     ax1.set_ylabel(' Likelihood $~Pr(x | y=Geothermal_{neg/pos}$', fontsize=25)#, rotation=-90)
     ax2.set_xlabel(str(x_cur), fontsize=18)
@@ -107,7 +107,8 @@ def likelihood_KDE(X_train,X_test, y_train, y_test,x_cur, best_parameters):
     #st.write('ax_ylims',ax_ylims)
     ax1.set_ylim(0,ax_ylims[1])
    
-    # ax1.set_ylim(0,ax2_ylims[1])
+    ax1.set_xlim(np.min(x_d) , np.max(x_d) )
+    ax2.set_xlim(np.min(x_d) , np.max(x_d) )
     
     # #.iloc[:,feat4]
     # # n_out = plt.hist([X_test[y_test>0],X_test[y_test==0]], color=['r','g'],histtype='barstacked',rwidth=(X_test.max() - X_test.min()) / kde_pos.bandwidth)
@@ -115,7 +116,7 @@ def likelihood_KDE(X_train,X_test, y_train, y_test,x_cur, best_parameters):
     # n_out = axes[1].hist([X_test[y_test>0],X_test[y_test==0]], color=['g','r'],histtype='barstacked',rwidth=(X_test.max() - X_test.min()) / kde_pos.bandwidth)
     shared_pyplot(fig2)
     #st.write('WIDTH of BARS: rwidth=(X_test.max() - X_test.min())',rwidth=(X_test.max() - X_test.min()))    
-      
+    #st.write('xlim', ax1.get_xlim())  
     ### COUNT ARRAY FIGURE # # # # #  #
     #st.write('Staying consistent, rows are *TRUE decision parameter* and columns are *interpretations*.')
     pos_counts = n_out[0][0] 
@@ -132,23 +133,6 @@ def likelihood_KDE(X_train,X_test, y_train, y_test,x_cur, best_parameters):
     #xstring = r'''${X}=$'''
     #ystring  = r'''${\Theta}=$'''
 
-    #labels = [item.get_text() for item in axes.get_xticklabels()]
-    #empty_string_labels = ['']*len(labels)
-    #empty_string_labels[1] = xstring+str(n_out[1][0]);
-    #empty_string_labels[3] = xstring+str(n_out[1][int(len(n_out)/2)]);
-    #empty_string_labels[5] = xstring+str(n_out[1][-1])
-    #axes.set_xticklabels(empty_string_labels)
-    #empty_string_labels = ['']*len(labels)
-    #empty_string_labels[1] = ystring+'Positive';
-    #empty_string_labels[3] = ystring+'Negative';
-    #empty_string_labels[5] = ystring+str(+2500)
-    #axes.set_yticklabels(empty_string_labels)
-
-    #axes.set_xlabel('Interpretation / Data Attribute ($j$)',fontsize=15)
-    #axes.set_ylabel('Pos / Neg Label ($i$)', fontsize=15)
-    #st.pyplot(fig3)
-
-    ## RECALCULATE counts with smoothed Likelihood ????
         
        
     #return Likelihood_logprob_pos, Likelihood_logprob_neg, x_d, count_ij 
@@ -169,12 +153,12 @@ def Scaledlikelihood_KDE(Pr_prior_POS, Likelihood_neg, Likelihood_pos, X_train,X
                         
     fig20, ax2 = plt.subplots(figsize=(15,8),ncols=1,nrows=1) # CHANGED to one subplot
     
-    n_out = ax2.hist([X_train[y_train>0]], alpha=0.05,facecolor='g',
+    n_out = ax2.hist([X_train[y_train>0]], alpha=0.05,facecolor='orangered', #g
                     histtype='bar', bins=x_sampled) #tacked,bins rwidth= kde_pos.bandwidth) #rwidth= kde_pos.bandwidth,
     # posi = n_out[0]
     # posi = np.append(posi,0)
     
-    n_out = ax2.hist(X_train[y_train==0], alpha=0.05,facecolor='r',
+    n_out = ax2.hist(X_train[y_train==0], alpha=0.5,facecolor='cornflowerblue',#r
                     histtype='barstacked',bins=x_sampled) #rwidth= kde_pos.bandwidth (X_test.max() - X_test.min()) / 
                     
     
@@ -183,9 +167,9 @@ def Scaledlikelihood_KDE(Pr_prior_POS, Likelihood_neg, Likelihood_pos, X_train,X
     ax2_ylims = ax2.axes.get_ylim()  
 
     ax1 = plt.twinx(ax=ax2)
-    ax1.fill_between(x_sampled, ScaledLikelihood[:,1], alpha=0.4,label='$~Pr(X|\Theta=Positive_{geothermal}$)',color='green') #norm_pos1, InputMarg_weight
+    ax1.fill_between(x_sampled, ScaledLikelihood[:,1], alpha=0.4,label='$~Pr(X|\Theta=Existence_{geothermal}$)',color='orangered') #green norm_pos1, InputMarg_weight
     ax1.plot(x_sampled, ScaledLikelihood[:,1],'g.') # norm_pos1
-    ax1.fill_between(x_sampled,ScaledLikelihood[:,0], alpha=0.3,label='$~Pr(X|\Theta=Negative_{geothermal}$)',color='red') #norm_neg1 InputMarg_weight
+    ax1.fill_between(x_sampled,ScaledLikelihood[:,0], alpha=0.3,label='$~Pr(X|\Theta=Absence_{geothermal}$)',color='cornflowerblue') #red norm_neg1 InputMarg_weight
     ax1.plot(x_sampled, ScaledLikelihood[:,0],'r.')  #norm_neg1
     ax1.legend(loc=0, fontsize=17)
     ax1.set_ylabel(' Scaled Likelihood $~Pr(x | y=Geothermal_{neg/pos}$', fontsize=25)#, rotation=-90)
@@ -260,9 +244,9 @@ def Posterior_Marginal_plot(post_input, post_uniform,marg,x_cur, x_sample):
     
     fig4, axes = plt.subplots(figsize=(15,8),ncols=1,nrows=1)
     plt.plot(x_sample,post_input[:,1],color='purple', linewidth=6, alpha=0.7)
-    plt.plot(x_sample,post_input[:,1],color='lime',linestyle='--', linewidth=3, label='$Pr(Positive|{})$ with Input Prior'.format(x_cur))
-    plt.plot(x_sample,post_input[:,0],color='purple', linewidth=6)
-    plt.plot(x_sample,post_input[:,0],'r--', linewidth=3,label='$Pr(Negative|{})$ with Input Prior'.format(x_cur))
+    plt.plot(x_sample,post_input[:,1],color='orangered',linestyle='--', linewidth=3, label='$Pr(Existence|{})$ with Input Prior'.format(x_cur))
+    plt.plot(x_sample,post_input[:,0],color='cornflowerblue', linewidth=6)
+    plt.plot(x_sample,post_input[:,0],color='cornflowerblue',linestyle='--', linewidth=3,label='$Pr(Absence|{})$ with Input Prior'.format(x_cur))
     # plt.plot(x_sample,post_uniform[:,1],'g--', alpha=0.1, linewidth=3,label='$Pr(Postitive|{})$ with Uniform Prior'.format(x_cur))
     #plt.plot(x_sample,post_uniform[:,1],color='purple', alpha=0.1)
     plt.ylim([0,1])
