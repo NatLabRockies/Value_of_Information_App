@@ -190,7 +190,7 @@ axins1.xaxis.set_major_formatter(formatter)
 axins1.xaxis.set_major_formatter('{x:0,.0f}')
 
 #Show the VOI plot
-shared_pyplot(firstfig2)
+st.pyplot(firstfig2) #)shared_pyplot(
 
 if showVperfect:  
     
