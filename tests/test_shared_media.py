@@ -78,9 +78,12 @@ def test_shared_pyplot_idempotent(media_dir):
     assert len(files) == 1
 
 
-def test_fallback_to_st_pyplot_when_unavailable(monkeypatch):
+def test_fallback_to_st_pyplot_when_unavailable(monkeypatch, tmp_path):
     """Falls back to st.pyplot when shared storage is unavailable."""
-    monkeypatch.setattr(shared_media, "MEDIA_DIR", "/nonexistent/readonly/path")
+    # Create a file where the directory should be - makedirs will fail
+    blocker = tmp_path / "not_a_dir"
+    blocker.write_text("block")
+    monkeypatch.setattr(shared_media, "MEDIA_DIR", str(blocker / "subdir"))
 
     fig, ax = plt.subplots()
     ax.plot([1, 2], [1, 2])
