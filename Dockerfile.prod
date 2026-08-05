@@ -65,6 +65,7 @@ RUN groupadd -g "${GID}" python \
 
 # Create shared media directory for multi-replica support
 RUN mkdir -p /shared/media && chown python:python /shared/media
+VOLUME ["/shared/media"]
 
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \

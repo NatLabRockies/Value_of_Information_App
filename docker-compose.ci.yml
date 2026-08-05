@@ -1,0 +1,39 @@
+services:
+  main:
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SHARED_MEDIA_DIR=/shared/media
+      - SHARED_MEDIA_URL=/media
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import requests; response = requests.get('http://localhost:8501/_stcore/health'); exit(0) if response.status_code == 200 else exit(1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  nginx:
+    image: wodby/nginx:latest
+    depends_on:
+      main:
+        condition: service_healthy
+    volumes_from:
+      - main:ro
+    ports:
+      - "8080:80"
+    environment:
+      NGINX_BACKEND_HOST: main
+      NGINX_BACKEND_PORT: "8501"
+      NGINX_DJANGO_MEDIA_ROOT: "/shared/media/"
+      NGINX_DJANGO_MEDIA_URL: "/media/"
+      NGINX_VHOST_PRESET: django
+      NGINX_WEBSOCKET_UPGRADE: "on"
+      NGINX_WEBSOCKET_READ_TIMEOUT: "3m"
+      NGINX_WEBSOCKET_SEND_TIMEOUT: "3m"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
