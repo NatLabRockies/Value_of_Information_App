@@ -205,8 +205,10 @@ st.markdown("""<hr style="height:10px;border:none;color:#333;background-color:#3
 with st.sidebar:
     attribute0 = None        
     # LOCATION OF THIS FILE 
+    st.page_link("https://youtu.be/3daKS2rb98U",\
+                 label=':orange-background[**Click here:\n VOI App Recorded Webinar**]',icon="")'
     st.page_link("https://forms.office.com/Pages/ResponsePage.aspx?id=fp3yoM0oVE-EQniFrufAgDjT0ckom9BErLMgwLSsipBUNDkwR05DRjlFNVpMQlFTQkxKSVA3NEJYMi4u",\
-                 label=':blue-background[**Click here:\n for feedback**]',icon=":material/cloud:")
+                 label=':blue-background[**Click here:\n for feedback**]',icon=":videocam:")
 
     st.page_link("https://github.com/NREL/Value_of_Information_App/tree/main/File%20Template",\
                  label=':orange-background[**Click here:\n User Manual, file templates & examples**]',icon=":material/question_exchange:")
