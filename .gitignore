@@ -1,18 +1,12 @@
-# Regular Python bytecode file
-*.pyc
+# Python environments and generated artifacts
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
 
 /.DS_Store
 /assets
-mymodule/__pycache__/code.cpython-39.pyc
-mymodule/__pycache__/code.cpython-39.pyc
-mymodule/__pycache__/code.cpython-39.pyc
-mymodule/__pycache__/__init__.cpython-39.pyc
-mymodule/__pycache__/__init__.cpython-310.pyc
-
-mymodule/__pycache__/code.cpython-39.pyc
-mymodule/__pycache__/code.cpython-310.pyc
-mymodule/__pycache__/.DS_Store
-mymodule/__pycache__/code.cpython-39.pyc
 release.sh
 env-vars.sh
 /appfleet-config
