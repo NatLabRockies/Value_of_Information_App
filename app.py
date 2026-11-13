@@ -206,9 +206,9 @@ with st.sidebar:
     attribute0 = None        
     # LOCATION OF THIS FILE 
     st.page_link("https://youtu.be/3daKS2rb98U",\
-                 label=':orange-background[**Click here:\n VOI App Recorded Webinar**]',icon="")'
+                 label=':orange-background[**Click here:\n VOI App Recorded Webinar**]',icon=":material/video_camera_front:")
     st.page_link("https://forms.office.com/Pages/ResponsePage.aspx?id=fp3yoM0oVE-EQniFrufAgDjT0ckom9BErLMgwLSsipBUNDkwR05DRjlFNVpMQlFTQkxKSVA3NEJYMi4u",\
-                 label=':blue-background[**Click here:\n for feedback**]',icon=":videocam:")
+                 label=':blue-background[**Click here:\n for feedback**]',icon=":material/description:")
 
     st.page_link("https://github.com/NREL/Value_of_Information_App/tree/main/File%20Template",\
                  label=':orange-background[**Click here:\n User Manual, file templates & examples**]',icon=":material/question_exchange:")
