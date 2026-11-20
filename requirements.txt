@@ -3,6 +3,10 @@ seaborn
 numpy
 matplotlib
 scikit-learn
+# Imported directly by the apps; previously only present as transitive deps.
+plotly
+scipy
+pandas
 git+https://github.com/NREL/GEOPHIRES-X.git#egg=geophires-x
 streamlit
 requests
