@@ -1,4 +1,8 @@
 """Combined entry point: both VOI apps in one, switched from the sidebar.
+© 2026 The Board of Trustees of the Leland Stanford Junior University.
+
+This material was produced under U.S. Department of Energy Contract No. DE-AC36-08GO28308 with the Alliance for Sustainable Energy, LLC (NREL), under Subcontract No. [SUB-2025-10353]. The U.S. Government retains certain rights in this material.
+
 
 Run with:   streamlit run voi_app.py
 
